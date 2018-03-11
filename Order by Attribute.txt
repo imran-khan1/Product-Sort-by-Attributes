@@ -1,0 +1,51 @@
+/************* Add sorting by attributes **************/
+ 
+/**
+ *  Defines the criteria for sorting with options defined in the method below
+ */
+add_filter('woocommerce_get_catalog_ordering_args', 'custom_woocommerce_get_catalog_ordering_args');
+ 
+function custom_woocommerce_get_catalog_ordering_args( $args ) {
+    global $wp_query;
+        // Changed the $_SESSION to $_GET
+    if (isset($_GET['orderby'])) {
+        switch ($_GET['orderby']) :
+            case 'asc_pa_color' :
+                $args['order'] = 'ASC';
+                $args['meta_key'] = 'pa_color';
+                /*$args['orderby'] = 'title';*/
+            break;
+             case 'desc_pa_color' :
+                $args['order'] = 'DESC';
+                $args['meta_key'] = 'pa_color';
+                /*$args['orderby'] = 'title';*/
+            break;
+        endswitch;
+    }
+    return $args;
+}
+ 
+/**
+ *  Adds the sorting options to dropdown list .. The logic/criteria is in the method above
+ */
+add_filter('woocommerce_catalog_orderby', 'custom_woocommerce_catalog_orderby');
+ 
+function custom_woocommerce_catalog_orderby( $sortby ) {
+    $sortby['asc_pa_color'] = 'Sort by Color Attribute A-Z';
+    $sortby['desc_pa_color'] = 'Sort by Color Attribute Z-A';
+    return $sortby;
+}
+ 
+/**
+ *  Save custom attributes as post's meta data as well so that we can use in sorting and searching
+ */
+add_action( 'save_post', 'save_woocommerce_attr_to_meta' );
+function save_woocommerce_attr_to_meta( $post_id ) {
+    echo $_REQUEST['attribute_names'];
+        // Get the attribute_names .. For each element get the index and the name of the attribute
+        // Then use the index to get the corresponding submitted value from the attribute_values array.
+    foreach( $_REQUEST['attribute_names'] as $index => $value ) {
+        update_post_meta( $post_id, $value, $_REQUEST['attribute_values'][$index] );
+    }
+}
+/************ End of Sorting ***************************/
